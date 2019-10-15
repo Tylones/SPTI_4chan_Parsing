@@ -2,11 +2,32 @@ import requests
 import json
 import datetime
 import time
+import sys
+import getopt
 
-def main():
-    print("Hello World!")
+board = '/b/'  # default board is /b/
+outputfile = 'output.json' # default output file is output.json
+
+def main(argv):
+
+    try:
+        opts, args = getopt.getopt(argv,"hb:o:",["board=","ofile="])
+    except getopt.GetoptError:
+        print("test.py -i <inputfile> -o <outputfile>")
+        sys.exit(2)
+
+    for opt, arg in opts:
+        if opt == '-h':
+            print("test.py -b <board> -o <outputfile>")
+            sys.exit()
+        elif opt in ("-b", "--board"):
+            board = arg
+        elif opt in ("-o", "--ofile"):
+            outputfile = arg
+    
+    print(board + " " + outputfile)
     timestamp=datetime.datetime.now()
-
+    start = timestamp
     # Retrieving the list of every existing thread in the desired board (here /po/)
     responseThreads = requests.get('https://a.4cdn.org/po/threads.json', 
     headers={'If-Modified-Since': str(timestamp)},)
@@ -29,5 +50,7 @@ def main():
                     print("no")
             time.sleep(1);
 
+    print(str(datetime.datetime.now()- start))
+
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1:])
