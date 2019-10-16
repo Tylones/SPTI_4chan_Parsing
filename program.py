@@ -4,11 +4,13 @@ import datetime
 import time
 import sys
 import getopt
+import os
 
-board = '/b/'  # default board is /b/
-outputfile = 'output.json' # default output file is output.json
+
 
 def main(argv):
+    board = 'b'  # default board is /b/
+    outputfile = 'output.json' # default output file is output.json
 
     try:
         opts, args = getopt.getopt(argv,"hb:o:",["board=","ofile="])
@@ -21,15 +23,25 @@ def main(argv):
             print("test.py -b <board> -o <outputfile>")
             sys.exit()
         elif opt in ("-b", "--board"):
-            board = arg
+            board = arg 
         elif opt in ("-o", "--ofile"):
             outputfile = arg
-    
-    print(board + " " + outputfile)
+
+
+    if(not os.path.exists(outputfile) or os.stat(outputfile).st_size == 0):
+        data = {}
+        data["threads"] = []
+        jsonFile = open(outputfile, "w+")
+        jsonFile.write(json.dumps(data))
+        jsonFile.close()
+
+    jsonFile = open(outputfile, "r") # Open the JSON file for reading
+    outputData = json.load(jsonFile) # Read the JSON into the buffer
+    jsonFile.close()
     timestamp=datetime.datetime.now()
     start = timestamp
     # Retrieving the list of every existing thread in the desired board (here /po/)
-    responseThreads = requests.get('https://a.4cdn.org/po/threads.json', 
+    responseThreads = requests.get('https://a.4cdn.org/'+board+'/threads.json', 
     headers={'If-Modified-Since': str(timestamp)},)
     for page in json.loads(responseThreads.content):
 
@@ -38,14 +50,19 @@ def main(argv):
             timestamp=datetime.datetime.now()
 
             # Retrieve the list of every existing replies for the thread
-            responseThreadContent = requests.get('https://a.4cdn.org/po/thread/' + str(thread["no"]) + '.json', 
+            responseThreadContent = requests.get('https://a.4cdn.org/'+board+'/thread/' + str(thread["no"]) + '.json', 
     headers={'If-Modified-Since': str(timestamp)},)
             content = json.loads(responseThreadContent.content)
             
             # For each replie, check if it contains a specific word (here "I")
             for replie in content["posts"]:
                 if("com" in replie and "I" in replie["com"]):
+                    outputData["threads"].append(content["posts"])
                     print(replie["com"])
+                    jsonFile = open(outputfile, "w+")
+                    jsonFile.write(json.dumps(outputData))
+                    jsonFile.close()
+                    sys.exit();
                 else:
                     print("no")
             time.sleep(1);
