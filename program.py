@@ -57,12 +57,12 @@ def main(argv):
             # For each replie, check if it contains a specific word (here "I")
             for replie in content["posts"]:
                 if("com" in replie and "I" in replie["com"]):
-                    outputData["threads"].append(content["posts"])
+                    # outputData["threads"].append(content["posts"])
                     print(replie["com"])
-                    jsonFile = open(outputfile, "w+")
-                    jsonFile.write(json.dumps(outputData))
-                    jsonFile.close()
-                    sys.exit();
+                    # jsonFile = open(outputfile, "w+")
+                    # jsonFile.write(json.dumps(outputData))
+                    # jsonFile.close()
+                    # sys.exit();
                 else:
                     print("no")
             time.sleep(1);
