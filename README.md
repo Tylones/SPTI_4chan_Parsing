@@ -8,5 +8,5 @@
 ## Run instructions :
 
 ```
-python program.py -o <outputfile.json>
+python program.py -o <outputfile.json> -b <board>
 ```
